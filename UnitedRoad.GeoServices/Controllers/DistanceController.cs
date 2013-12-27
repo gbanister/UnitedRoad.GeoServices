@@ -5,20 +5,33 @@
 	using System.Net;
 	using System.Security.Cryptography;
 	using System.Text;
+	using System.Web;
 	using System.Web.Http;
 	using Newtonsoft.Json;
+	using UnitedRoad.GeoServices.Infrustructure;
 
 	public class DistanceController : ApiController
 	{
+		private readonly IAppSettings _appSettings;
+
+		public DistanceController(IAppSettings appSettings)
+		{
+			_appSettings = appSettings;
+		}
+
 		public int Get(string origin, string destination)
 		{
 			var url = @"http://maps.googleapis.com/maps/api/distancematrix/json?origins=" +
 			          origin + "&destinations=" + destination +
 			          "&mode=driving&sensor=false&language=en-EN&units=imperial";
 
-			url += "&client=";
+			url += "&client=" + _appSettings.GoogleApiClientId();
 
-			var request = (HttpWebRequest) WebRequest.Create(url);
+			var httpEncoddedUrl = HttpUtility.UrlEncode(url);
+
+			var signedUrl = Sign(httpEncoddedUrl, _appSettings.GoogleApiClientKey());
+
+			var request = (HttpWebRequest)WebRequest.Create(signedUrl);
 			var response = request.GetResponse();
 			var dataStream = response.GetResponseStream();
 			var sreader = new StreamReader(dataStream);
