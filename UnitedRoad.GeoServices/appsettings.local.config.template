@@ -1,0 +1,4 @@
+<appSettings>
+  <add key="GoogleApiClientId" value="clientId" />
+  <add key="GoogleApiClientKey" value="clientKey" />
+</appSettings>
