@@ -3,16 +3,26 @@
 	using System;
 	using System.Collections.Generic;
 	using System.ComponentModel;
-	using System.IO;
 	using System.Linq;
-	using System.Net;
+	using System.Web;
 	using System.Web.Http;
 	using System.Web.Http.Controllers;
 	using System.Web.Http.ModelBinding;
-	using Newtonsoft.Json;
+	using UnitedRoad.GeoServices.Infrustructure;
 
 	public class DistanceMatrixController : ApiController
 	{
+		private readonly IAppSettings _appSettings;
+		private readonly ISignUrl _signUrl;
+		private readonly IMakeRequest _makeRequest;
+
+		public DistanceMatrixController(IAppSettings appSettings, ISignUrl signUrl, IMakeRequest makeRequest)
+		{
+			_appSettings = appSettings;
+			_signUrl = signUrl;
+			_makeRequest = makeRequest;
+		}
+
 
 		public IEnumerable<dynamic> Get([ModelBinder(typeof (DelimitedArrayModelBinder))] 
 			                                string[] origins,
@@ -22,18 +32,17 @@
 			var originsString = string.Join("|", origins);
 			var destinationsString = string.Join("|", destinations);
 
-			var url = @"http://maps.googleapis.com/maps/api/distancematrix/json?origins=" +
+			var urlParams = @"/json?origins=" +
 			          originsString + "&destinations=" + destinationsString +
 			          "&mode=driving&sensor=false&language=en-EN&units=imperial";
 
-			var request = (HttpWebRequest) WebRequest.Create(url);
-			var response = request.GetResponse();
-			var dataStream = response.GetResponseStream();
-			var sreader = new StreamReader(dataStream);
-			var responsereader = sreader.ReadToEnd();
-			response.Close();
+			urlParams += "&client=" + _appSettings.GoogleApiClientId();
 
-			dynamic result = JsonConvert.DeserializeObject(responsereader);
+			var fullUrl = Constants.DISTANCE_MATRIX_BASE_URL + urlParams;
+
+			var signedUrl = _signUrl.Sign(fullUrl, _appSettings.GoogleApiClientKey());
+
+			var result = _makeRequest.GetResponse(signedUrl);
 
 			if (result.status != "OK") yield break;
 			

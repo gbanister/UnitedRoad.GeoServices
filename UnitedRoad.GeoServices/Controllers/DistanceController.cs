@@ -1,44 +1,36 @@
 ﻿namespace UnitedRoad.GeoServices.Controllers
 {
 	using System;
-	using System.IO;
-	using System.Net;
-	using System.Security.Cryptography;
-	using System.Text;
 	using System.Web;
 	using System.Web.Http;
-	using Newtonsoft.Json;
 	using UnitedRoad.GeoServices.Infrustructure;
 
 	public class DistanceController : ApiController
 	{
 		private readonly IAppSettings _appSettings;
+		private readonly ISignUrl _signUrl;
+		private readonly IMakeRequest _makeRequest;
 
-		public DistanceController(IAppSettings appSettings)
+		public DistanceController(IAppSettings appSettings, ISignUrl signUrl, IMakeRequest makeRequest)
 		{
 			_appSettings = appSettings;
+			_signUrl = signUrl;
+			_makeRequest = makeRequest;
 		}
 
 		public int Get(string origin, string destination)
 		{
-			var url = @"http://maps.googleapis.com/maps/api/distancematrix/json?origins=" +
+			var urlParams = @"/json?origins=" +
 			          origin + "&destinations=" + destination +
 			          "&mode=driving&sensor=false&language=en-EN&units=imperial";
 
-			url += "&client=" + _appSettings.GoogleApiClientId();
+			urlParams += "&client=" + _appSettings.GoogleApiClientId();
 
-			var httpEncoddedUrl = HttpUtility.UrlEncode(url);
+			var fullUrl = Constants.DISTANCE_MATRIX_BASE_URL + urlParams;
 
-			var signedUrl = Sign(httpEncoddedUrl, _appSettings.GoogleApiClientKey());
+			var signedUrl = _signUrl.Sign(fullUrl, _appSettings.GoogleApiClientKey());
 
-			var request = (HttpWebRequest)WebRequest.Create(signedUrl);
-			var response = request.GetResponse();
-			var dataStream = response.GetResponseStream();
-			var sreader = new StreamReader(dataStream);
-			var responsereader = sreader.ReadToEnd();
-			response.Close();
-
-			dynamic result = JsonConvert.DeserializeObject(responsereader);
+			var result = _makeRequest.GetResponse(signedUrl);
 
 			if (result.status == "OK")
 			{
@@ -49,28 +41,6 @@
 
 			return 0;
 
-		}
-
-		public static string Sign(string url, string keyString)
-		{
-			var encoding = new ASCIIEncoding();
-
-			// converting key to bytes will throw an exception, need to replace '-' and '_' characters first.
-			var usablePrivateKey = keyString.Replace("-", "+").Replace("_", "/");
-			var privateKeyBytes = Convert.FromBase64String(usablePrivateKey);
-
-			var uri = new Uri(url);
-			var encodedPathAndQueryBytes = encoding.GetBytes(uri.LocalPath + uri.Query);
-
-			// compute the hash
-			var algorithm = new HMACSHA1(privateKeyBytes);
-			var hash = algorithm.ComputeHash(encodedPathAndQueryBytes);
-
-			// convert the bytes to string and make url-safe by replacing '+' and '/' characters
-			var signature = Convert.ToBase64String(hash).Replace("+", "-").Replace("/", "_");
-
-			// Add the signature to the existing URI.
-			return uri.Scheme + "://" + uri.Host + uri.LocalPath + uri.Query + "&signature=" + signature;
 		}
 	}
 }

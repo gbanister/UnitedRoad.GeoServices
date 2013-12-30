@@ -182,7 +182,10 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Infrustructure\Constants.cs" />
     <Compile Include="Infrustructure\IAppSettings.cs" />
+    <Compile Include="Infrustructure\ISignUrl.cs" />
+    <Compile Include="Infrustructure\IRequest.cs" />
     <Compile Include="Models\DistanceMatrixRequest.cs" />
     <Compile Include="Models\StepModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
