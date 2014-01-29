@@ -32,7 +32,7 @@
 
 			var result = _makeRequest.GetResponse(signedUrl);
 
-			if (result.status == "OK")
+			if (result.status == "OK" && result.rows[0].elements[0].status.Value == "OK")
 			{
 				string distanceString = result.rows[0].elements[0].distance.text;
 				var distance = Convert.ToInt32(distanceString.Replace(" mi", "").Replace(",", ""));
