@@ -18,7 +18,7 @@
 			_makeRequest = makeRequest;
 		}
 
-		public int Get(string origin, string destination)
+		public dynamic Get(string origin, string destination)
 		{
 			var urlParams = @"/json?origins=" +
 			          origin + "&destinations=" + destination +
@@ -36,7 +36,8 @@
 			{
 				string distanceString = result.rows[0].elements[0].distance.text;
 				var distance = Convert.ToInt32(distanceString.Replace(" mi", "").Replace(",", ""));
-				return distance;
+				var duration = result.rows[0].elements[0].duration.text;
+				return new {distance, duration};
 			}
 
 			return 0;
