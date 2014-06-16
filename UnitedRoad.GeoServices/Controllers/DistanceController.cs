@@ -35,7 +35,7 @@
 			if (result.status == "OK" && result.rows[0].elements[0].status.Value == "OK")
 			{
 				string distanceString = result.rows[0].elements[0].distance.text;
-				var distance = Convert.ToInt32(distanceString.Replace(" mi", "").Replace(",", ""));
+				var distance = Convert.ToDecimal(distanceString.Replace(" mi", "").Replace(",", ""));
 				var duration = result.rows[0].elements[0].duration.text;
 				return new {distance, duration};
 			}
