@@ -18,7 +18,10 @@
 
 using StructureMap;
 namespace UnitedRoad.GeoServices.DependencyResolution {
-    public static class IoC {
+	using Common.Logging;
+	using Common.Logging.Log4Net;
+
+	public static class IoC {
         public static IContainer Initialize() {
             ObjectFactory.Initialize(x =>
                         {
@@ -27,7 +30,8 @@ namespace UnitedRoad.GeoServices.DependencyResolution {
                                         scan.TheCallingAssembly();
                                         scan.WithDefaultConventions();
                                     });
-            //                x.For<IExample>().Use<Example>();
+							x.For<ILog>().Use(LogManager.GetCurrentClassLogger);
+
                         });
             return ObjectFactory.Container;
         }
