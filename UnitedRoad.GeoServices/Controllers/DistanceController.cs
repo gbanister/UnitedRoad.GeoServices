@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Diagnostics;
+	using System.Text.RegularExpressions;
 	using System.Web;
 	using System.Web.Http;
 	using System.Web.Http.Filters;
@@ -46,6 +47,9 @@
 			if (result.status == "OK" && result.rows[0].elements[0].status.Value == "OK")
 			{
 				string distanceString = result.rows[0].elements[0].distance.text;
+				// convert anything less than 1 mile to 0
+				var regexp = new Regex("\\d+ ft");
+				distanceString = regexp.Replace(distanceString, "0");
 				var distance = Convert.ToDecimal(distanceString.Replace(" mi", "").Replace(",", ""));
 				var duration = result.rows[0].elements[0].duration.text;
 
