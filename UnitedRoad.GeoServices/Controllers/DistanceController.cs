@@ -3,16 +3,12 @@
 	using System;
 	using System.Diagnostics;
 	using System.Text.RegularExpressions;
-	using System.Web;
 	using System.Web.Http;
-	using System.Web.Http.Filters;
-	using System.Web.Mvc;
 	using Common.Logging;
-	using UnitedRoad.GeoServices.Infrustructure;
-	using ActionFilterAttribute = System.Web.Http.Filters.ActionFilterAttribute;
+	using Infrustructure;
 
 
-	public class DistanceController : ApiController
+    public class DistanceController : ApiController
 	{
 		private readonly IAppSettings _appSettings;
 		private readonly ISignUrl _signUrl;
